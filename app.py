@@ -5,21 +5,20 @@ import os
 
 app = Flask(__name__)
 
-# Putanja do SavedModel foldera (mora biti u repozitorijumu)
+# Učitavanje SavedModel modela
 MODEL_DIR = "model_tf"
-
-# Učitaj model iz SavedModel formata
-loaded_model = tf.saved_model.load(MODEL_DIR)
-inference_func = loaded_model.signatures["serving_default"]
+model = tf.saved_model.load(MODEL_DIR)
+predict_fn = model.signatures["serving_default"]
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        data = request.json['inputs']  # očekuje listu dužine 6
-        input_array = tf.constant([data], dtype=tf.float32)
-        result = inference_func(input_layer=input_array)
-        prediction = result["dense_3"].numpy()[0][0]
-        return jsonify({'prediction': float(prediction)})
+        data = request.json['inputs']
+        input_tensor = tf.convert_to_tensor([data], dtype=tf.float32)
+        result = predict_fn(input_tensor)
+        # Uzmi prvi rezultat iz dict-a
+        prediction_value = list(result.values())[0].numpy()[0][0]
+        return jsonify({'prediction': float(prediction_value)})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
