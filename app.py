@@ -1,12 +1,22 @@
-from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
-
-# Učitavanje modela
-model = tf.keras.models.load_model("ann_model.h5")
-
+from flask import Flask, request, jsonify
+import os
+import zipfile
 
 app = Flask(__name__)
+
+# Putanja do zip fajla i gde će se raspakovati
+ZIP_PATH = "/etc/secrets/model_tf.zip"
+MODEL_DIR = "/tmp/model_tf"
+
+# Raspakuj model ako već nije
+if not os.path.exists(MODEL_DIR):
+    with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
+        zip_ref.extractall(MODEL_DIR)
+
+# Učitaj model iz SavedModel foldera
+model = tf.keras.models.load_model(MODEL_DIR)
 
 @app.route('/predict', methods=['POST'])
 def predict():
