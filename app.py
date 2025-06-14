@@ -7,7 +7,7 @@ import zipfile
 app = Flask(__name__)
 
 # Putanja do zip fajla i gde će se raspakovati
-ZIP_PATH = "/etc/secrets/model_tf.zip"
+ZIP_PATH = "/etc/secrets/model_tf_v2.zip"
 MODEL_DIR = "/tmp/model_tf"
 
 # Raspakuj model ako već nije
