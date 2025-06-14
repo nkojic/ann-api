@@ -1,9 +1,13 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
-from flask import Flask, request, jsonify
 import os
 
+
 app = Flask(__name__)
+CORS(app, resources={r"/predict": {"origins": "https://gradjevina.prekvalifikacija.com"}})
+
 
 # Učitavanje SavedModel modela
 MODEL_DIR = "model_tf"
