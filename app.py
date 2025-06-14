@@ -3,7 +3,8 @@ import tensorflow as tf
 import numpy as np
 
 # Učitavanje modela
-model = tf.keras.models.load_model("model_ann.h5")
+model = tf.keras.models.load_model("ann_model.h5")
+
 
 app = Flask(__name__)
 
