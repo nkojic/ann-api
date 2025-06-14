@@ -12,9 +12,10 @@ model = tf.keras.models.load_model(MODEL_DIR)
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json['inputs']
-    input_array = np.array([data])
-    prediction = model.predict(input_array)[0][0]
+    input_array = np.array([data], dtype=np.float32)  # eksplicitno float32
+    prediction = model(input_array).numpy()[0][0]
     return jsonify({'prediction': float(prediction)})
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
