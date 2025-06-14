@@ -20,3 +20,6 @@ def predict():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+
+loaded = tf.saved_model.load("model_tf")
+print(list(loaded.signatures["serving_default"].structured_input_signature))
