@@ -2,20 +2,11 @@ import tensorflow as tf
 import numpy as np
 from flask import Flask, request, jsonify
 import os
-import zipfile
 
 app = Flask(__name__)
 
-# Putanja do zip fajla i gde će se raspakovati
-ZIP_PATH = "/etc/secrets/model_tf_v2.zip"
-MODEL_DIR = "/tmp/model_tf"
-
-# Raspakuj model ako već nije
-if not os.path.exists(MODEL_DIR):
-    with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
-        zip_ref.extractall(MODEL_DIR)
-
-# Učitaj model iz SavedModel foldera
+# Nema ZIP-a — direktno iz lokalne putanje
+MODEL_DIR = "model_tf"
 model = tf.keras.models.load_model(MODEL_DIR)
 
 @app.route('/predict', methods=['POST'])
@@ -26,8 +17,5 @@ def predict():
     return jsonify({'prediction': float(prediction)})
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
-
-
