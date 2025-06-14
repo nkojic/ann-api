@@ -2,36 +2,26 @@ import tensorflow as tf
 import numpy as np
 from flask import Flask, request, jsonify
 import os
-import zipfile
 
 app = Flask(__name__)
 
-# Putanja do zip fajla i gde će se raspakovati
-ZIP_PATH = "/etc/secrets/model_tf_v2.zip"
-MODEL_DIR = "/tmp/model_tf"
+# Putanja do SavedModel foldera (mora biti u repozitorijumu)
+MODEL_DIR = "model_tf"
 
-# Raspakuj model ako već nije
-if not os.path.exists(MODEL_DIR):
-    with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
-        zip_ref.extractall(MODEL_DIR)
-
-# Učitaj SavedModel model
+# Učitaj model iz SavedModel formata
 loaded_model = tf.saved_model.load(MODEL_DIR)
-predict_fn = loaded_model.signatures["serving_default"]
+inference_func = loaded_model.signatures["serving_default"]
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json['inputs']  # očekuje se lista od 6 float brojeva
-    input_array = np.array([data], dtype=np.float32)  # Oblik (1, 6)
-
-    # Napravi dict sa imenom input tenzora
-    input_dict = {'input_layer': tf.convert_to_tensor(input_array)}
-
-    # Poziv modela
-    result = predict_fn(**input_dict)
-    prediction = result['dense_3'].numpy()[0][0]  # dense_3 je naziv izlaza
-
-    return jsonify({'prediction': float(prediction)})
+    try:
+        data = request.json['inputs']  # očekuje listu dužine 6
+        input_array = tf.constant([data], dtype=tf.float32)
+        result = inference_func(input_layer=input_array)
+        prediction = result["dense_3"].numpy()[0][0]
+        return jsonify({'prediction': float(prediction)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
